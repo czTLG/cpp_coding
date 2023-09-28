@@ -19,15 +19,19 @@ public:
       (*count_)++;
     }
   }
+
   shared_ptr &operator=(const shared_ptr<T> &obj) {
-    reset();
-    ptr_ = obj.get();
-    count_ = obj.get_count();
-    if (count_) {
-      (*count_)++;
+    if (this != &this) {
+      reset();
+      ptr_ = obj.get();
+      count_ = obj.get_count();
+      if (count_) {
+        (*count_)++;
+      }
     }
     return *this;
   }
+
   shared_ptr(const shared_ptr<T> &&obj) {
     reset();
     ptr_ = obj.get();
@@ -36,18 +40,23 @@ public:
       (*count_)++;
     }
   }
+
   shared_ptr &operator=(const shared_ptr<T> &&obj) {
-    reset();
-    ptr_ = obj.ptr_;
-    count_ = obj.get_count();
-    if (count_) {
-      (*count_)++;
+    if (this != &this) {
+      reset();
+      ptr_ = obj.ptr_;
+      count_ = obj.get_count_ptr();
+
+      obj.get() = nullptr;
+      obj.get_count() = nullptr;
     }
-    obj.get() = nullptr;
-    obj.get_count() = nullptr;
+
+    return *this;
   }
 
   T &operator*() const { return *ptr_; }
+
+  T &operator->() const { return ptr_; }
 
   void reset() {
     if (count_) {
@@ -91,7 +100,7 @@ int main() {
   shared_ptr<Foo> box2(box1);
   std::cout << box1.get_count() << std::endl;
   std::cout << box2.get_count() << std::endl;
-  
+
   box2.reset();
   std::cout << box1.get_count() << std::endl;
   std::cout << box2.get_count() << std::endl;
